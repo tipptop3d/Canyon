@@ -12,6 +12,7 @@ Utility Bot written by TippTop. Work in Progress
 
 initial_extensions = (
     "cogs.settings",
+    "cogs.admin"
 )
 
 default_prefix = "c!"
