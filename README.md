@@ -1,6 +1,8 @@
 # Canyon
  Discord Bot by TippTop
+
 ```
+
 Canyon
 ├─ .gitattributes
 ├─ .gitignore
@@ -11,6 +13,8 @@ Canyon
 │  ├─ settings.py
 │  ├─ utils
 │  │  ├─ database.py
+│  │  ├─ embeds.py
+│  │  ├─ info.py
 │  │  └─ __init__.py
 │  └─ __init__.py
 ├─ README.md

@@ -1,12 +1,26 @@
 import discord
 from discord.ext import commands
+import requests
 
-from .utils import database 
+import datetime
+import pytz
+
+from .utils import database, config
+from .utils.embeds import MyEmbeds as embeds
+
+class Pastebin():
+
+    def __init__(self, url):
+        self.api_key = config.PASTEBIN_KEY
+        self.url = url
+
+pastebin = Pastebin("https://pastebin.com/api/api_post.php")
+
 
 class Admin(commands.Cog):
 
     """Debugging and Admin-Only Commands"""
-++
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -14,17 +28,60 @@ class Admin(commands.Cog):
     @commands.is_owner()
     async def evaluate(self, ctx, *, code):
         """Evaluates a python expression"""
-
-        await ctx.send(f"Code to evaluate: {code}")
-
         try:
-            await ctx.send(eval(code.strip("`")))
+            result = eval(code.strip("`"))
         except SyntaxError as e:
-            await ctx.send(f"Some kind of Syntax Error occured: {e}")
+            await ctx.send(embed=embeds.create_error("Syntax Error in your Expression", e))
         except Exception as e:
-            await ctx.send(f"An Error occured: {e}")
+            await ctx.send(embed=embeds.create_error(None, e))
         else:
-            await ctx.send("Evaluated Code")
+            try:
+                embed = discord.Embed(
+                    title="Evaluated Python Expression",
+                    color= 0x34709f,
+                )
+                embed.set_footer(
+                    text=f"Requested by {ctx.author.name}",
+                    icon_url="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png"
+                )
+                await ctx.send(f"```Result: {result}```", embed=embed)
+
+            except discord.HTTPException as e:
+                payload = {
+                    "api_dev_key": pastebin.api_key,
+                    "api_option": "paste",
+                    "api_paste_name": f"Evaluated Python Expression by {ctx.author.name}",
+                    "api_paste_code": result,
+                    "api_paste_private": 1,
+                    "api_paste_expire_date": "1H",
+                    "api_paste_format": "json",
+                }
+
+                r = requests.post(pastebin.url, data=payload)
+
+                content = r.content.decode('utf-8')
+
+                if "Bad API request" in content:
+                    embed = discord.Embed(
+                        title = "Result is over 2000 characters long",
+                        description = f"Error while uploading to pastebin: {content.split(',')[2].strip(' ')}",
+                        color = 0xff0000
+                    )
+
+                else:
+                    embed = discord.Embed(
+                        title="Evaluated Python Expression",
+                        url=content,
+                        color= 0x34709f,
+                        timestamp=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+                    )
+                    embed.set_footer(
+                        text=f"Requested by {ctx.author.name} ― Expires ",
+                        icon_url="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png"
+                    )
+
+                await ctx.send(embed=embed)
+
 
     @commands.command(aliases=["exec", "code"])
     @commands.is_owner()
@@ -34,11 +91,17 @@ class Admin(commands.Cog):
         try:
             exec(code.strip("`"))
         except SyntaxError as e:
-            await ctx.send(f"Some kind of Syntax Error occured: {e}")
+            await ctx.send(embed=embeds.create_error("Syntax Error in your Expression", e))
         except Exception as e:
-            await ctx.send(f"An Error occured: {e}")
+            await ctx.send(embed=embeds.create_error(None, e))
         else:
-            await ctx.send("Executed Code")
+            await ctx.send(embed=discord.Embed(
+                title="Executed the Python Code",
+                color= 0x34709f,
+            ).set_footer(
+                text=f"Requested by {ctx.author.name}",
+                icon_url="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png"
+            ))
 
 
     @commands.command()
@@ -49,9 +112,9 @@ class Admin(commands.Cog):
         try:
             self.bot.load_extension(module)
         except Exception as e:
-            await ctx.send(f"Failed loading Extension: {e}")
+            await ctx.send(embed=embeds.create_error("Failed loading Extension", e))
         else:
-            await ctx.send("Loaded extention")
+            await ctx.send(embed=embeds.create_success("Success", "Successfully loaded extension"))
 
 
     @commands.command()
@@ -62,9 +125,9 @@ class Admin(commands.Cog):
         try:
             self.bot.unload_extension(module)
         except Exception as e:
-            await ctx.send(f"Failed unloading Extension: {e}")
+            await ctx.send(embed=embeds.create_error("Failed unloading Extension", e))
         else:
-            await ctx.send("Unloaded extention")
+            await ctx.send(embed=embeds.create_success("Success", "Successfully unloaded extension"))
 
 
     @commands.command(name='reload')
@@ -75,9 +138,9 @@ class Admin(commands.Cog):
         try:
             self.bot.reload_extension(module)
         except Exception as e:
-            await ctx.send(f"Failed reloading Extension: {e}")
+            await ctx.send(embed=embeds.create_error("Failed reloading Extension", e))
         else:
-            await ctx.send("Reloaded extention")
+            await ctx.send(embed=embeds.create_success("Success", "Successfully reloaded extension"))
 
 
 def setup(bot):

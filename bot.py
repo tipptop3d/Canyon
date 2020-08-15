@@ -1,7 +1,7 @@
 import discord 
 from discord.ext import commands
 
-from cogs.utils import database
+from cogs.utils import database, config
 
 import cogs
 
@@ -12,7 +12,8 @@ Utility Bot written by TippTop. Work in Progress
 
 initial_extensions = (
     "cogs.settings",
-    "cogs.admin"
+    "cogs.admin",
+    "cogs.info"
 )
 
 default_prefix = "c!"
@@ -36,10 +37,7 @@ async def on_ready():
             print(f"Failed to load extension {extension}: {e}")
 
 
-
-
-
-bot.run("NzI2Mzg2NTkwNjgyNzEwMDY3.XvciOg.M3pgAlu5kEXkGm5abRhChdKmWgE")
+bot.run(config.BOT_TOKEN)
 
 
 
