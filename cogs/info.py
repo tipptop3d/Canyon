@@ -6,8 +6,9 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(aliases=["github", "repositry"])
     async def git(self, ctx):
+        """Shows Canyons Git-Repositry"""
         await ctx.send("https://github.com/tipptop3d/Canyon")
 
 def setup(bot):
