@@ -3,7 +3,6 @@ from discord.ext import commands
 import requests
 
 import datetime
-import pytz
 
 from .utils import database, config
 from .utils.embeds import MyEmbeds as embeds
@@ -29,7 +28,7 @@ class Admin(commands.Cog):
     async def evaluate(self, ctx, *, code):
         """Evaluates a python expression"""
         try:
-            result = eval(code.strip("`"))
+            result = eval(code.strip("`").replace("py", ""))
         except SyntaxError as e:
             await ctx.send(embed=embeds.create_error("Syntax Error in your Expression", e))
         except Exception as e:
