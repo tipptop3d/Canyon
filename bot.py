@@ -1,11 +1,12 @@
+import sys
+import traceback
+
 import discord
 from discord.ext import commands
-import sys
-
-from cogs.utils import database, config
 
 import cogs
-
+from cogs.utils import config, database
+from cogs.utils.embeds import MyEmbeds as embeds
 
 description = """
 Utility Bot written by TippTop. Work in Progress
@@ -24,8 +25,8 @@ bot = commands.Bot(
 )
 
 @bot.command()
-async def test(ctx):
-    await ctx.send("test")
+async def test(ctx, arg1, arg2):
+    await ctx.send(f"{arg1}, {arg2}")
 
 @bot.event
 async def on_ready():
@@ -38,15 +39,4 @@ async def on_ready():
             print(f"Failed to load extension {extension}: {e}")
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.MissingRequiredAguments):
-        pass
-
-
-
 bot.run(config.BOT_TOKEN)
-
-
-
-

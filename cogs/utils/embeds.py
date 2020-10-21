@@ -3,10 +3,10 @@ import discord
 class MyEmbeds():
     
     @classmethod
-    def create_error(cls, title, exception : Exception):
+    def create_error(cls, title, description, exception : Exception = None):
         return discord.Embed(
             title = title or "Error",
-            description=f"{type(exception).__name__}: {exception}",
+            description = description or f"{type(exception).__name__}: {exception}",
             color = 0xff0000
         )
 
