@@ -33,7 +33,6 @@ class Admin(commands.Cog):
             result = f'Result: {eval(code.strip("`").replace("py", ""))}'
         except Exception as e:
             result = f"Error: {e}"
-
         try:
 
             embed = discord.Embed(
