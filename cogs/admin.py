@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import requests
+import traceback
 
 import datetime
 
@@ -25,70 +26,69 @@ class Admin(commands.Cog):
 
     @commands.command(aliases=["eval"])
     @commands.is_owner()
-    async def evaluate(self, ctx, *, code):
+    async def evaluate(self, ctx, *, code : str):
         """Evaluates a python expression"""
+
         try:
-            result = eval(code.strip("`").replace("py", ""))
-        except SyntaxError as e:
-            await ctx.send(embed=embeds.create_error("Syntax Error in your Expression", e))
+            result = f'Result: {eval(code.strip("`").replace("py", ""))}'
         except Exception as e:
-            await ctx.send(embed=embeds.create_error(None, e))
-        else:
-            try:
+            result = f"Error: {e}"
+
+        try:
+
+            embed = discord.Embed(
+                title="Evaluated Python Expression",
+                color= 0x34709f,
+            ).set_footer(
+                text=f"Requested by {ctx.author.name}",
+                icon_url="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png"
+            )
+            
+            await ctx.send(f"```{result}```", embed=embed)
+        
+        except discord.HTTPException as e:
+            print(result)
+            payload = {
+                "api_dev_key": pastebin.api_key,
+                "api_option": "paste",
+                "api_paste_name": f"Evaluated Python Expression by {ctx.author.name}",
+                "api_paste_code": str(result),
+                "api_paste_private": 1,
+                "api_paste_expire_date": "1H",
+                "api_paste_format": "json",
+            }
+
+            r = requests.post(pastebin.url, data=payload)
+
+            content = r.content.decode('utf-8')
+
+            if "Bad API request" in content:
+                embed = discord.Embed(
+                    title = "Result is over 2000 characters long",
+                    description = f"Error while uploading to pastebin: {content.split(',')[2].strip(' ')}",
+                    color = 0xff0000
+                )
+
+            else:
                 embed = discord.Embed(
                     title="Evaluated Python Expression",
+                    url=content,
                     color= 0x34709f,
-                )
-                embed.set_footer(
-                    text=f"Requested by {ctx.author.name}",
+                    timestamp=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+                ).set_footer(
+                    text=f"Requested by {ctx.author.name} ― Expires ",
                     icon_url="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png"
                 )
-                await ctx.send(f"```Result: {result}```", embed=embed)
 
-            except discord.HTTPException as e:
-                payload = {
-                    "api_dev_key": pastebin.api_key,
-                    "api_option": "paste",
-                    "api_paste_name": f"Evaluated Python Expression by {ctx.author.name}",
-                    "api_paste_code": result,
-                    "api_paste_private": 1,
-                    "api_paste_expire_date": "1H",
-                    "api_paste_format": "json",
-                }
-
-                r = requests.post(pastebin.url, data=payload)
-
-                content = r.content.decode('utf-8')
-
-                if "Bad API request" in content:
-                    embed = discord.Embed(
-                        title = "Result is over 2000 characters long",
-                        description = f"Error while uploading to pastebin: {content.split(',')[2].strip(' ')}",
-                        color = 0xff0000
-                    )
-
-                else:
-                    embed = discord.Embed(
-                        title="Evaluated Python Expression",
-                        url=content,
-                        color= 0x34709f,
-                        timestamp=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
-                    )
-                    embed.set_footer(
-                        text=f"Requested by {ctx.author.name} ― Expires ",
-                        icon_url="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/267_Python_logo-512.png"
-                    )
-
-                await ctx.send(embed=embed)
-
+            await ctx.send(embed=embed)
 
     @commands.command(aliases=["exec", "code"])
     @commands.is_owner()
-    async def execute(self, ctx, *, code):
+    async def execute(self, ctx, *, code : str):
         """Executes a code snippet"""
 
         try:
-            exec(code.strip("`"))
+            exec(code.strip("`").replace("py", ""))
         except SyntaxError as e:
             await ctx.send(embed=embeds.create_error("Syntax Error in your Expression", e))
         except Exception as e:
@@ -137,9 +137,10 @@ class Admin(commands.Cog):
         try:
             self.bot.reload_extension(module)
         except Exception as e:
-            await ctx.send(embed=embeds.create_error("Failed reloading Extension", e))
-        else:
+            await ctx.send(embed=embeds.create_error("Failed reload Extension", e))
+        else:    
             await ctx.send(embed=embeds.create_success("Success", "Successfully reloaded extension"))
+
 
 
 def setup(bot):
