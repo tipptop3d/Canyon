@@ -1,0 +1,8 @@
+config.py
+*.db
+*.db-*
+*.code-workspace
+.vscode/
+__pycache__/
+venv/
+
