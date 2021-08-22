@@ -21,9 +21,9 @@ class Player:
         cards = "\n".join(str(card) for card in self.hand)
         return f'Name: {self.name}, Cards: \n{cards}'
 
-    def show_hand(self):
-        '\n'.join(f'{i+1}: {card}' for i,
-                  card in enumerate(self.hand))
+    def show_hand(self) -> str:
+        return '\n'.join(f'{i+1}: {card}' for i,
+                         card in enumerate(self.hand))
 
     def draw(self, card: WhiteCard) -> None:
         self.hand.append(card)
