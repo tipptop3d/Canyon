@@ -11,7 +11,7 @@ async def multiple_wait_for(bot: commands.bot.Bot,
                             events: list[dict[str, int, Callable]]):
     done, pending = await asyncio.wait([
         bot.wait_for(event['event_type'], timeout=event['timeout'],
-                    check=event['check']) for event in events
+                     check=event['check']) for event in events
     ], return_when=asyncio.FIRST_COMPLETED)
     try:
         stuff = done.pop().result()

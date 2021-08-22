@@ -13,8 +13,10 @@ from cogs.utils import config
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s: %(message)s'))
+handler = logging.FileHandler(
+    filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s:%(levelname)s: %(message)s'))
 logger.addHandler(handler)
 
 BASE_DIR = Path(__file__).parent.parent
@@ -76,19 +78,20 @@ class CanyonBot(commands.Bot):
             suggestions.sort(key=lambda item: item[0], reverse=True)
             str_suggestions = '\n'.join(
                 f'> {ctx.prefix}**{alias}** ({ratio:.0%})'
-                    for ratio, alias in suggestions)
+                for ratio, alias in suggestions)
 
             if str_suggestions:
                 await ctx.reply(f'Maybe you mean:\n{str_suggestions}')
-        
+
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send('This command is currently disabled')
 
         elif isinstance(error, commands.NSFWChannelRequired):
             await ctx.send('This command is only usable in NSFW-channels')
-     
+
         elif isinstance(error, commands.BotMissingPermissions):
-            missing_perms = ', '.join(f'`{perm}`' for perm in error.missing_perms)
+            missing_perms = ', '.join(
+                f'`{perm}`' for perm in error.missing_perms)
             await ctx.send(f'I am missing permissions to perform this command.\
                             Please inform an Admin if this is not intended.\n \
                             Missing Permissions: {missing_perms}')

@@ -1,12 +1,21 @@
 class Card:
-    def __init__(self, card: dict[str, int]):
+    __slots__ = ('text', 'pack')
+    def __init__(self, **card) -> None:
         self.text = card['text']
         self.pack = card['pack']
 
+
 class WhiteCard(Card):
-    pass
+    def __str__(self) -> str:
+        return f'"{self.text}"'
+    
+
 
 class BlackCard(Card):
-    def __init__(self, card: dict[str, int, int]):
-        super().__init__(card)
+    __slots__ = ('pick')
+    def __init__(self, **card):
+        super().__init__(**card)
         self.pick = card['pick']
+    
+    def __str__(self) -> str:
+        return f'"{self.text.replace("_", "_"*5)}" Pick: {self.pick}'
